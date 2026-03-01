@@ -16,7 +16,7 @@
     <div
       class="flex w-fit m-0 absolute items-center left-1/2 top-1/2 transform -translate-1/2 md:left-0 md:mr-4 md:translate-x-0 md:left-4"
     >
-      <img src="../../../assets/Wallet_logo.png" class="h-20 w-auto drop-shadow-md" />
+      <img src="../../assets/Wallet_logo.png" class="h-20 w-auto drop-shadow-md" />
     </div>
 
     <div
