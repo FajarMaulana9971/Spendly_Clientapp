@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import Navbar from './components/Navbar.vue'
+import Navbar from '../../components/navbar/Navbar.vue'
 import SummaryCards from './components/SummaryCards.vue'
 import UnpaidExpensesChart from './components/UnpaidExpensesChart.vue'
 import MonthlyReportChart from './components/MonthlyReportChart.vue'
