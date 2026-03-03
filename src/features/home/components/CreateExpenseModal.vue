@@ -7,7 +7,8 @@ const form = ref({
   title: '',
   amount: '',
   category: '',
-  date: new Date().toISOString().split('T')[0],
+  spentAt: new Date().toISOString().split('T')[0],
+  isSplitBill: false,
   description: '',
 })
 const loading = ref(false)
@@ -45,6 +46,18 @@ const submit = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const formatNumber = (value) => {
+  if (!value) return ''
+
+  const number = value.toString().replace(/[^0-9]/g, '')
+  return new Intl.NumberFormat('en-US').format(number)
+}
+
+const handleAmountInput = (event) => {
+  const rawValue = event.target.value.replace(/[^0-9]/g, '')
+  form.value.amount = formatNumber(rawValue)
 }
 </script>
 
@@ -88,7 +101,7 @@ const submit = async () => {
           />
         </div>
 
-        <div>
+        <!-- <div>
           <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5"
             >Jumlah (Rp) *</label
           >
@@ -98,6 +111,66 @@ const submit = async () => {
             placeholder="0"
             class="w-full bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm placeholder:text-slate-500"
           />
+        </div>
+
+        <div>
+          <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5"
+            >Split Bill</label
+          >
+          <input
+            type="checkbox"
+            v-model="form.isSplitBill"
+            class="w-5 h-5 accent-violet-600 cursor-pointer"
+          />
+        </div> -->
+
+        <div>
+          <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5">
+            Jumlah (Rp) *
+          </label>
+
+          <div class="flex items-center gap-3">
+            <!-- Input Amount -->
+            <input
+              :value="form.amount"
+              @input="handleAmountInput"
+              type="text"
+              inputmode="numeric"
+              placeholder="0"
+              class="flex-1 bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm placeholder:text-slate-500"
+            />
+
+            <!-- Split Bill Toggle -->
+            <label
+              class="flex items-center gap-2 cursor-pointer select-none bg-slate-700/60 px-3 py-2 rounded-lg border border-slate-600 hover:border-violet-500 transition-colors"
+            >
+              <input type="checkbox" v-model="form.isSplitBill" class="peer hidden" />
+
+              <!-- Custom Box -->
+              <div
+                class="w-5 h-5 rounded-md border border-slate-500 flex items-center justify-center peer-checked:bg-violet-600 peer-checked:border-violet-600 transition-all"
+              >
+                <svg
+                  v-if="form.isSplitBill"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3 h-3 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+
+              <span
+                :class="form.isSplitBill ? 'text-violet-400' : 'text-slate-400'"
+                class="text-xs font-medium transition-colors"
+              >
+                Split
+              </span>
+            </label>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -115,10 +188,10 @@ const submit = async () => {
           </div>
           <div>
             <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5"
-              >Tanggal</label
+              >Tanggal *</label
             >
             <input
-              v-model="form.date"
+              v-model="form.spentAt"
               type="date"
               class="w-full bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
             />

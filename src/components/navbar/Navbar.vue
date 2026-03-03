@@ -62,13 +62,14 @@
       class="w-fit my-0 p-0 md:flex items-center align-center rounded-[16px] md:bg-transparent md:absolute md:top-1/2 md:left-1/2 md:-translate-1/2 transition-all border-[2px_solid_#ffffff88] md:py-4 gap-x-4 lg:gap-x-8 bg-gray-500 **:transition-all **:text-[clamp(1rem,calc(2vw_+_0.1rem),1.3rem)] group-has-checked:px-16 group-has-checked:py-2 group-has-checked:-translate-x-2 group-has-checked:my-8 **:[line-height:4px] **:has-[a]:px-0 **:has-[a]:py-0 **:has-[a]:grid **:has-[a]:place-content-center **:has-[a]:rounded-full **:has-[a]:bg-transparent **:has-[a]:group-has-checked:px-4 **:has-[a]:group-has-checked:py-2 **:has-[a]:group-has-checked:h-[2rem]"
     >
       <li class="">
-        <a
+        <!-- <a
           href=" #top"
           onClick="closeMenu()"
           class="h-0 opacity-0 md:opacity-100 group-has-checked:opacity-100"
         >
           Pengeluaran
-        </a>
+        </a> -->
+        <RouterLink to="/expenses">Pengeluaran</RouterLink>
       </li>
 
       <li
