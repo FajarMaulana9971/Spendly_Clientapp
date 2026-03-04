@@ -7,7 +7,7 @@ import MonthlyReportChart from './components/MonthlyReportChart.vue'
 import CategoryChart from './components/CategoryChart.vue'
 import ExpenseTable from './components/ExpenseTable.vue'
 import PaymentTable from './components/PaymentTable.vue'
-import CreateExpenseModal from './components/CreateExpenseModal.vue'
+import CreateExpenseModal from '../../components/modal/CreateExpenseModal.vue'
 import CreatePaymentModal from './components/CreatePaymentModal.vue'
 
 const showCreateExpense = ref(false)

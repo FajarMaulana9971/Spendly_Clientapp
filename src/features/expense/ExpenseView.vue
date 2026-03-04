@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import Navbar from '../../components/navbar/Navbar.vue'
-import CreateExpenseModal from '../home/components/CreateExpenseModal.vue'
+import CreateExpenseModal from '../../components/modal/CreateExpenseModal.vue'
 import ExpenseDetailModal from './components/ExpenseDetailModal.vue'
 import EditExpenseModal from './components/EditExpenseModal.vue'
 import DatePicker from '../../components/datePicker/DatePicker.vue'
@@ -258,7 +258,7 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
           >
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Pengeluaran
+          Pengeluaran
         </button>
       </div>
 
@@ -643,51 +643,41 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
 
                 <!-- Aksi -->
                 <th
-                  class="px-4 py-4 w-40 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider"
+                  class="px-4 py-4 w-36 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider"
                 >
                   Aksi
                 </th>
               </tr>
             </thead>
-
             <tbody class="divide-y divide-slate-700/30">
               <tr
                 v-for="expense in filteredExpenses"
                 :key="expense.id"
                 class="group hover:bg-slate-700/20 transition-colors duration-150"
               >
-                <!-- Title -->
                 <td class="px-6 py-4">
                   <span class="text-white font-medium text-sm">{{ expense.title }}</span>
                 </td>
-
-                <!-- Category -->
                 <td class="px-4 py-4">
                   <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-300 border border-slate-600/50"
+                    >{{ expense.category || '-' }}</span
                   >
-                    {{ expense.category || '-' }}
-                  </span>
                 </td>
-
-                <!-- Amount -->
                 <td class="px-4 py-4 text-right">
                   <div v-if="expense.isSplitBill" class="flex flex-col items-end gap-0.5">
                     <span
                       class="text-slate-500 text-xs tabular-nums line-through decoration-slate-500/70"
+                      >{{ formatCurrency(expense.amount) }}</span
                     >
-                      {{ formatCurrency(expense.amount) }}
-                    </span>
-                    <span class="text-emerald-400 font-semibold text-sm tabular-nums">
-                      {{ formatCurrency(expense.finalAmount) }}
-                    </span>
+                    <span class="text-emerald-400 font-semibold text-sm tabular-nums">{{
+                      formatCurrency(expense.finalAmount)
+                    }}</span>
                   </div>
-                  <span v-else class="text-emerald-400 font-semibold text-sm tabular-nums">
-                    {{ formatCurrency(expense.finalAmount ?? expense.amount) }}
-                  </span>
+                  <span v-else class="text-emerald-400 font-semibold text-sm tabular-nums">{{
+                    formatCurrency(expense.finalAmount ?? expense.amount)
+                  }}</span>
                 </td>
-
-                <!-- Split Bill -->
                 <td class="px-4 py-4 text-center">
                   <span
                     v-if="expense.isSplitBill"
@@ -722,43 +712,43 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
                     </svg>
                   </span>
                 </td>
-
-                <!-- isPaid -->
                 <td class="px-4 py-4 text-center">
                   <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
                     :class="
                       expense.isPaid
                         ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                         : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                     "
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
                   >
                     <span
-                      class="w-1.5 h-1.5 rounded-full"
                       :class="expense.isPaid ? 'bg-emerald-400' : 'bg-amber-400'"
+                      class="w-1.5 h-1.5 rounded-full"
                     ></span>
                     {{ expense.isPaid ? 'Lunas' : 'Belum' }}
                   </span>
                 </td>
-
-                <!-- spentAt -->
                 <td class="px-4 py-4">
                   <span class="text-slate-400 text-sm">{{ formatDate(expense.spentAt) }}</span>
                 </td>
 
                 <!-- ─── Action buttons ─── -->
                 <td class="px-4 py-4">
+                  <!--
+                    Mobile  (< md): selalu terlihat, icon-only, lebih kecil
+                    Desktop (≥ md): tersembunyi sampai hover baris
+                  -->
                   <div
-                    class="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-150"
+                    class="action-btns flex items-center justify-end gap-0.5 transition-all duration-150"
                   >
                     <!-- Detail -->
                     <button
                       @click="openDetail(expense.id)"
                       title="Lihat detail"
-                      class="flex items-center gap-1 text-slate-400 hover:text-violet-300 text-xs font-medium px-2 py-1.5 rounded-lg hover:bg-violet-500/10 transition-all whitespace-nowrap"
+                      class="flex items-center justify-center gap-1 text-slate-400 hover:text-violet-300 active:text-violet-300 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-violet-500/10 active:bg-violet-500/15 transition-all"
                     >
                       <svg
-                        class="w-3.5 h-3.5 shrink-0"
+                        class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -786,10 +776,10 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
                       v-if="!expense.isPaid"
                       @click="openEdit(expense)"
                       title="Edit pengeluaran"
-                      class="flex items-center gap-1 text-slate-400 hover:text-amber-300 text-xs font-medium px-2 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all whitespace-nowrap"
+                      class="flex items-center justify-center gap-1 text-slate-400 hover:text-amber-300 active:text-amber-300 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-amber-500/10 active:bg-amber-500/15 transition-all"
                     >
                       <svg
-                        class="w-3.5 h-3.5 shrink-0"
+                        class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -804,14 +794,14 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
                       <span class="hidden lg:inline">Edit</span>
                     </button>
 
-                    <!-- Lock icon — sudah lunas, tidak bisa diubah -->
+                    <!-- Lock icon — sudah dibayar, tidak bisa edit/delete -->
                     <span
                       v-else
                       title="Sudah lunas — tidak dapat diubah"
-                      class="flex items-center justify-center w-7 h-7 text-slate-700 cursor-not-allowed"
+                      class="flex items-center justify-center w-8 h-8 text-slate-700 cursor-not-allowed"
                     >
                       <svg
-                        class="w-3.5 h-3.5"
+                        class="w-4 h-4 md:w-3.5 md:h-3.5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -830,10 +820,10 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
                       v-if="!expense.isPaid"
                       @click="confirmDelete(expense.id)"
                       title="Hapus pengeluaran"
-                      class="flex items-center gap-1 text-slate-400 hover:text-rose-400 text-xs font-medium px-2 py-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                      class="flex items-center justify-center gap-1 text-slate-400 hover:text-rose-400 active:text-rose-400 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-rose-500/10 active:bg-rose-500/15 transition-all"
                     >
                       <svg
-                        class="w-3.5 h-3.5 shrink-0"
+                        class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1037,3 +1027,20 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+/* Mobile: action buttons always visible */
+.action-btns {
+  opacity: 1;
+}
+
+/* Desktop: hide until row hover */
+@media (min-width: 768px) {
+  .action-btns {
+    opacity: 0;
+  }
+  tr:hover .action-btns {
+    opacity: 1;
+  }
+}
+</style>

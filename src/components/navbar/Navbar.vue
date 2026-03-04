@@ -1,90 +1,282 @@
-<script setup></script>
+<script setup>
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const mobileOpen = ref(false)
+
+const links = [
+  { to: '/', label: 'Beranda', icon: 'home' },
+  { to: '/expenses', label: 'Pengeluaran', icon: 'expense' },
+  { to: '/payments', label: 'Pembayaran', icon: 'payment' },
+]
+
+const isActive = (to) => {
+  if (to === '/') return route.path === '/'
+  return route.path.startsWith(to)
+}
+
+const closeMobile = () => {
+  mobileOpen.value = false
+}
+</script>
 
 <template>
-  <nav
-    data-text-bright
-    data-bg="slate"
-    class="fixed w-[95vw] min-w-95 max-w-360 shadow h-16 md:flex p-4 mx-0 mt-2 top-0 left-1/2 -translate-x-1/2 rounded-full ring-white/50 ring-2 backdrop-blur-md shadow-[0_10px_20px_-10px_black] group data-[bg=stone]:bg-stone-600/40 data-[bg=slate]:bg-slate-900/60 data-[bg=stone]:bg-stone-600/40 data-text-bright:**:text-white"
-  >
-    <div class="absolute top-1/2 -translate-y-1/2 right-8"></div>
-
-    <input
-      type="checkbox"
-      id="navbar__control"
-      class="md:hidden absolute w-8 h-8 top-4 left-4 z-10 opacity-0"
+  <!-- ── backdrop for mobile ── -->
+  <Transition name="fade">
+    <div
+      v-if="mobileOpen"
+      class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+      @click="closeMobile"
     />
-    <div
-      class="flex w-fit m-0 absolute items-center left-1/2 top-1/2 transform -translate-1/2 md:left-0 md:mr-4 md:translate-x-0 md:left-4"
-    >
-      <img src="../../assets/Wallet_logo.png" class="h-20 w-auto drop-shadow-md" />
-    </div>
+  </Transition>
 
+  <nav class="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl">
     <div
-      data-info="OPEN MENU ICON"
-      class="md:hidden relative w-8 h-8 cursor-pointer group-has-checked:hidden"
+      class="relative flex items-center justify-between h-14 px-3 rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.07)]"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24">
-        <g fill="#fff" stroke-width="0.5" stroke="#fff">
-          <path
-            d="M8 6.983a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2zM7 12a1 1 0 0 1 1-1h8a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1m1 3.017a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2z"
+      <!-- ── Logo ── -->
+      <RouterLink to="/" class="flex items-center gap-2.5 pl-1 group" @click="closeMobile">
+        <div class="relative">
+          <img
+            src="../../assets/Wallet_logo.png"
+            class="h-15 w-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110"
+            alt="Spendly"
           />
-          <path
-            fill-rule="evenodd"
-            d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2s10 4.477 10 10m-2 0a8 8 0 1 1-16 0a8 8 0 0 1 16 0"
-            clip-rule="evenodd"
-          />
-        </g>
-      </svg>
-    </div>
+          <!-- subtle glow behind logo -->
+          <div
+            class="absolute inset-0 blur-lg opacity-0 group-hover:opacity-40 bg-violet-400 transition-opacity duration-500 rounded-full scale-75"
+          ></div>
+        </div>
+      </RouterLink>
 
-    <div
-      data-info="CLOSE MENU ICON"
-      class="md:!hidden hidden relative w-8 h-8 cursor-pointer group-has-checked:block"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24">
-        <path
-          fill="none"
-          stroke="currentColor"
-          stroke-dasharray="12"
-          stroke-dashoffset="12"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 12l7 7M12 12l-7 -7M12 12l-7 7M12 12l7 -7"
+      <!-- ── Desktop nav links ── -->
+      <ul class="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+        <li v-for="link in links" :key="link.to">
+          <RouterLink
+            :to="link.to"
+            class="relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+            :class="
+              isActive(link.to)
+                ? 'text-white'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+            "
+          >
+            <!-- active pill background -->
+            <span
+              v-if="isActive(link.to)"
+              class="absolute inset-0 rounded-xl bg-white/10 border border-white/15 shadow-inner"
+            ></span>
+
+            <!-- icons -->
+            <svg
+              v-if="link.icon === 'home'"
+              class="relative w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            <svg
+              v-else-if="link.icon === 'expense'"
+              class="relative w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <svg
+              v-else-if="link.icon === 'payment'"
+              class="relative w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+
+            <span class="relative">{{ link.label }}</span>
+
+            <!-- active dot indicator -->
+            <span
+              v-if="isActive(link.to)"
+              class="relative ml-0.5 w-1 h-1 rounded-full bg-violet-400 shadow-[0_0_6px_2px_rgba(167,139,250,0.6)]"
+            ></span>
+          </RouterLink>
+        </li>
+      </ul>
+
+      <!-- ── Right side: decorative status pill (desktop) ── -->
+      <div class="hidden md:flex items-center gap-2 pr-1">
+        <div
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
         >
-          <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="12;0" />
-        </path>
-      </svg>
-    </div>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-emerald-400 text-xs font-medium">Aktif</span>
+        </div>
+      </div>
 
-    <ul
-      data-info="MENU ITEMS"
-      class="w-fit my-0 p-0 md:flex items-center align-center rounded-[16px] md:bg-transparent md:absolute md:top-1/2 md:left-1/2 md:-translate-1/2 transition-all border-[2px_solid_#ffffff88] md:py-4 gap-x-4 lg:gap-x-8 bg-gray-500 **:transition-all **:text-[clamp(1rem,calc(2vw_+_0.1rem),1.3rem)] group-has-checked:px-16 group-has-checked:py-2 group-has-checked:-translate-x-2 group-has-checked:my-8 **:[line-height:4px] **:has-[a]:px-0 **:has-[a]:py-0 **:has-[a]:grid **:has-[a]:place-content-center **:has-[a]:rounded-full **:has-[a]:bg-transparent **:has-[a]:group-has-checked:px-4 **:has-[a]:group-has-checked:py-2 **:has-[a]:group-has-checked:h-[2rem]"
-    >
-      <li class="">
-        <!-- <a
-          href=" #top"
-          onClick="closeMenu()"
-          class="h-0 opacity-0 md:opacity-100 group-has-checked:opacity-100"
-        >
-          Pengeluaran
-        </a> -->
-        <RouterLink to="/expenses">Pengeluaran</RouterLink>
-      </li>
-
-      <li
-        class="my-0 h-0 group-has-checked:h-6 group-has-checked:my-4 md:mx-2 md:h-2 md:group-has-checked:my-0"
+      <!-- ── Mobile: hamburger ── -->
+      <button
+        class="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-xl hover:bg-white/5 transition-colors gap-1.5 mr-1"
+        @click="mobileOpen = !mobileOpen"
+        aria-label="Toggle menu"
       >
-        <a
-          href="#about"
-          onClick="closeMenu()"
-          class="h-0 opacity-0 md:opacity-100 group-has-checked:opacity-100"
+        <span
+          class="block h-px w-5 bg-slate-300 transition-all duration-300 origin-center"
+          :class="mobileOpen ? 'rotate-45 translate-y-[3px]' : ''"
+        ></span>
+        <span
+          class="block h-px w-5 bg-slate-300 transition-all duration-300"
+          :class="mobileOpen ? 'opacity-0 scale-x-0' : ''"
+        ></span>
+        <span
+          class="block h-px w-5 bg-slate-300 transition-all duration-300 origin-center"
+          :class="mobileOpen ? '-rotate-45 -translate-y-[9px]' : ''"
+        ></span>
+      </button>
+    </div>
+
+    <!-- ── Mobile dropdown menu ── -->
+    <Transition name="slide-down">
+      <div
+        v-if="mobileOpen"
+        class="md:hidden mt-2 rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-[0_16px_40px_-8px_rgba(0,0,0,0.7)] overflow-hidden"
+      >
+        <div class="p-2">
+          <RouterLink
+            v-for="link in links"
+            :key="link.to"
+            :to="link.to"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150"
+            :class="
+              isActive(link.to)
+                ? 'bg-white/10 text-white border border-white/10'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            "
+            @click="closeMobile"
+          >
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center"
+              :class="
+                isActive(link.to)
+                  ? 'bg-violet-500/20 border border-violet-500/30'
+                  : 'bg-slate-700/50'
+              "
+            >
+              <svg
+                v-if="link.icon === 'home'"
+                class="w-4 h-4"
+                :class="isActive(link.to) ? 'text-violet-400' : 'text-slate-500'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              <svg
+                v-else-if="link.icon === 'expense'"
+                class="w-4 h-4"
+                :class="isActive(link.to) ? 'text-violet-400' : 'text-slate-500'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <svg
+                v-else-if="link.icon === 'payment'"
+                class="w-4 h-4"
+                :class="isActive(link.to) ? 'text-violet-400' : 'text-slate-500'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+            </div>
+            <span>{{ link.label }}</span>
+            <span
+              v-if="isActive(link.to)"
+              class="ml-auto w-1.5 h-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_2px_rgba(167,139,250,0.5)]"
+            ></span>
+          </RouterLink>
+        </div>
+
+        <!-- bottom status bar in mobile menu -->
+        <div
+          class="flex items-center justify-between px-4 py-3 border-t border-white/5 bg-slate-950/40"
         >
-          Pembayaran
-        </a>
-      </li>
-    </ul>
+          <span class="text-slate-600 text-xs">spendly v1.0</span>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-emerald-500 text-xs font-medium">Aktif</span>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </nav>
 </template>
 
-<style scoped></style>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-down-enter-active {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-down-leave-active {
+  transition: all 0.18s ease-in;
+}
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+}
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.99);
+}
+
+/* Active link underline shimmer */
+a.router-link-exact-active {
+  position: relative;
+}
+</style>
