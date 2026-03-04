@@ -57,7 +57,7 @@ const formatNumber = (value) => {
 
 const handleAmountInput = (event) => {
   const rawValue = event.target.value.replace(/[^0-9]/g, '')
-  form.value.amount = formatNumber(rawValue)
+  form.value.amount = rawValue
 }
 </script>
 
@@ -101,29 +101,6 @@ const handleAmountInput = (event) => {
           />
         </div>
 
-        <!-- <div>
-          <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5"
-            >Jumlah (Rp) *</label
-          >
-          <input
-            v-model="form.amount"
-            type="number"
-            placeholder="0"
-            class="w-full bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm placeholder:text-slate-500"
-          />
-        </div>
-
-        <div>
-          <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5"
-            >Split Bill</label
-          >
-          <input
-            type="checkbox"
-            v-model="form.isSplitBill"
-            class="w-5 h-5 accent-violet-600 cursor-pointer"
-          />
-        </div> -->
-
         <div>
           <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5">
             Jumlah (Rp) *
@@ -131,8 +108,17 @@ const handleAmountInput = (event) => {
 
           <div class="flex items-center gap-3">
             <!-- Input Amount -->
-            <input
+            <!-- <input
               :value="form.amount"
+              @input="handleAmountInput"
+              type="text"
+              inputmode="numeric"
+              placeholder="0"
+              class="flex-1 bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm placeholder:text-slate-500"
+              /> -->
+
+            <input
+              :value="formatNumber(form.amount)"
               @input="handleAmountInput"
               type="text"
               inputmode="numeric"
