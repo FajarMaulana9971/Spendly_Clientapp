@@ -5,6 +5,7 @@ import CreateExpenseModal from '../../components/modal/CreateExpenseModal.vue'
 import ExpenseDetailModal from './components/ExpenseDetailModal.vue'
 import EditExpenseModal from './components/EditExpenseModal.vue'
 import DatePicker from '../../components/datePicker/DatePicker.vue'
+import BulkDailyExpenseModal from './components/BulkDailyExpenseModal.vue'
 
 // --- State ---
 const expenses = ref([])
@@ -13,6 +14,7 @@ const error = ref(null)
 const showCreateExpense = ref(false)
 const selectedExpenseId = ref(null)
 const showDetail = ref(false)
+const showBulkDaily = ref(false)
 
 // Edit modal
 const showEdit = ref(false)
@@ -49,14 +51,6 @@ const SORT_OPTIONS = [
 const BASE_URL = 'http://localhost:3000/api'
 
 const categories = [
-  'Food',
-  'Transport',
-  'Entertainment',
-  'Health',
-  'Shopping',
-  'Utilities',
-  'Education',
-  'Other',
   'Makanan',
   'Transportasi',
   'Utilitas',
@@ -64,6 +58,7 @@ const categories = [
   'Kesehatan',
   'Belanja',
   'Pendidikan',
+  'Harian',
   'Lainnya',
 ]
 
@@ -245,21 +240,44 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
           <h1 class="text-3xl font-bold text-white tracking-tight">Pengeluaran</h1>
           <p class="text-slate-400 mt-1 text-sm">{{ totalItems }} total pengeluaran tercatat</p>
         </div>
-        <button
-          @click="showCreateExpense = true"
-          class="flex items-center gap-2 bg-violet-500 hover:bg-violet-400 text-white font-semibold px-5 py-2.5 rounded-full shadow-lg shadow-violet-500/30 transition-all duration-200 hover:scale-105 w-fit"
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2.5"
+
+        <div class="flex flex-col gap-2 items-start sm:items-end">
+          <button
+            @click="showCreateExpense = true"
+            class="flex items-center gap-2 bg-violet-500 hover:bg-violet-400 text-white font-semibold px-5 py-2.5 rounded-full shadow-lg shadow-violet-500/30 transition-all duration-200 hover:scale-105 w-fit"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Pengeluaran
-        </button>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Pengeluaran
+          </button>
+
+          <button
+            @click="showBulkDaily = true"
+            class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-5 py-2.5 rounded-full border border-slate-600/50 transition-all duration-200 hover:scale-105 w-fit text-sm"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            Bulk Harian
+          </button>
+        </div>
       </div>
 
       <!-- Filters -->
@@ -965,6 +983,11 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
       :expense="editingExpense"
       @close="((showEdit = false), (editingExpense = null))"
       @updated="handleUpdated"
+    />
+    <BulkDailyExpenseModal
+      v-if="showBulkDaily"
+      @close="showBulkDaily = false"
+      @created="handleCreated"
     />
 
     <!-- ─── Delete Confirm Dialog ─── -->
