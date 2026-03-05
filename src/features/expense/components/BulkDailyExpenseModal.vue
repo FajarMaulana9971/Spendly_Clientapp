@@ -10,6 +10,7 @@ const BASE_URL = 'http://localhost:3000/api'
 const step = ref(1)
 const loadingStatus = ref(false)
 const submitting = ref(false)
+const submitDone = ref(false)
 const errorMsg = ref('')
 const successMsg = ref('')
 
@@ -78,6 +79,7 @@ const submitBulk = async () => {
     return
   }
   submitting.value = true
+  submitDone.value = false
   errorMsg.value = ''
   try {
     const expenses = Array.from(selectedDates.value)
@@ -98,13 +100,15 @@ const submitBulk = async () => {
     })
     const json = await res.json()
     if (!res.ok) throw new Error(json.message || 'Gagal menyimpan')
+
+    // Show success state inside overlay before closing
+    submitDone.value = true
     successMsg.value = `Berhasil menambahkan ${expenses.length} expense harian.`
     emit('created')
-    setTimeout(() => emit('close'), 1500)
+    setTimeout(() => emit('close'), 1800)
   } catch (e) {
-    errorMsg.value = e.message || 'Gagal menyimpan expense.'
-  } finally {
     submitting.value = false
+    errorMsg.value = e.message || 'Gagal menyimpan expense.'
   }
 }
 
@@ -144,11 +148,114 @@ watch([startDate, endDate], () => {
       leave-to-class="opacity-0"
     >
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="$emit('close')" />
+        <div
+          class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          @click="!submitting && $emit('close')"
+        />
 
         <div
-          class="relative bg-slate-800 border border-slate-700/60 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] flex flex-col"
+          class="relative bg-slate-800 border border-slate-700/60 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] flex flex-col overflow-hidden"
         >
+          <!-- ── Saving overlay ── -->
+          <Transition
+            enter-active-class="transition duration-300"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+          >
+            <div
+              v-if="submitting"
+              class="saving-overlay absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 rounded-2xl"
+            >
+              <!-- Success state -->
+              <Transition
+                enter-active-class="transition duration-400"
+                enter-from-class="opacity-0 scale-75"
+                enter-to-class="opacity-100 scale-100"
+              >
+                <div v-if="submitDone" class="flex flex-col items-center gap-4">
+                  <div
+                    class="success-ring flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500/50"
+                  >
+                    <svg
+                      class="w-8 h-8 text-emerald-400 checkmark-draw"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-white font-semibold text-sm">Berhasil Disimpan!</p>
+                    <p class="text-slate-400 text-xs mt-1">{{ successMsg }}</p>
+                  </div>
+                </div>
+              </Transition>
+
+              <!-- Loading state -->
+              <Transition
+                enter-active-class="transition duration-200"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition duration-150"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+              >
+                <div v-if="!submitDone" class="flex flex-col items-center gap-4">
+                  <!-- Orbital spinner -->
+                  <div class="orbital-wrapper">
+                    <div class="orbital-ring"></div>
+                    <div class="orbital-ring ring-2"></div>
+                    <div class="orbital-core">
+                      <svg
+                        class="w-5 h-5 text-violet-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="text-center">
+                    <p class="text-white font-semibold text-sm">Menyimpan expense...</p>
+                    <p class="text-slate-400 text-xs mt-1">
+                      {{ selectedDates.size }} hari · {{ formatCurrency(totalAmount) }}
+                    </p>
+                  </div>
+
+                  <!-- Animated progress dots -->
+                  <div class="flex items-center gap-1.5">
+                    <span
+                      class="saving-dot w-1.5 h-1.5 rounded-full bg-violet-400"
+                      style="animation-delay: 0ms"
+                    ></span>
+                    <span
+                      class="saving-dot w-1.5 h-1.5 rounded-full bg-violet-400"
+                      style="animation-delay: 160ms"
+                    ></span>
+                    <span
+                      class="saving-dot w-1.5 h-1.5 rounded-full bg-violet-400"
+                      style="animation-delay: 320ms"
+                    ></span>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+          </Transition>
+
           <!-- Header -->
           <div
             class="flex items-center justify-between px-6 py-4 border-b border-slate-700/50 shrink-0"
@@ -178,7 +285,8 @@ watch([startDate, endDate], () => {
             </div>
             <button
               @click="$emit('close')"
-              class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
+              :disabled="submitting"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               <svg
                 class="w-4 h-4"
@@ -231,7 +339,7 @@ watch([startDate, endDate], () => {
             </div>
           </div>
 
-          <!-- Body — custom scrollbar via scoped class -->
+          <!-- Body -->
           <div class="modal-body flex-1 overflow-y-auto px-6 py-4 space-y-4">
             <!-- Step 1: Date range -->
             <div class="space-y-3">
@@ -297,7 +405,6 @@ watch([startDate, endDate], () => {
             <!-- Step 2 -->
             <template v-if="step === 2 && dailyStatus.length > 0">
               <div class="border-t border-slate-700/40 pt-4 space-y-3">
-                <!-- Summary chips -->
                 <div class="flex gap-2 flex-wrap">
                   <span
                     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-700/50 border border-slate-600/40 text-slate-400 text-xs"
@@ -319,7 +426,6 @@ watch([startDate, endDate], () => {
                   </span>
                 </div>
 
-                <!-- Select all toggle -->
                 <div
                   v-if="availableDates.length > 0"
                   class="flex items-center justify-between py-2 px-3 rounded-xl bg-slate-700/30 border border-slate-600/30"
@@ -343,7 +449,6 @@ watch([startDate, endDate], () => {
                   </button>
                 </div>
 
-                <!-- Date list — custom scrollbar -->
                 <div class="date-list space-y-1.5 max-h-52 overflow-y-auto">
                   <div
                     v-for="item in dailyStatus"
@@ -459,27 +564,6 @@ watch([startDate, endDate], () => {
               </svg>
               {{ errorMsg }}
             </div>
-
-            <!-- Success -->
-            <div
-              v-if="successMsg"
-              class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs"
-            >
-              <svg
-                class="w-4 h-4 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {{ successMsg }}
-            </div>
           </div>
 
           <!-- Footer -->
@@ -493,11 +577,11 @@ watch([startDate, endDate], () => {
                 >Total: {{ formatCurrency(totalAmount) }}</span
               >
             </div>
-
             <div class="flex gap-3">
               <button
                 @click="$emit('close')"
-                class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-xl transition-colors text-sm"
+                :disabled="submitting"
+                class="flex-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 font-medium py-2.5 rounded-xl transition-colors text-sm"
               >
                 Batal
               </button>
@@ -532,6 +616,114 @@ watch([startDate, endDate], () => {
 </template>
 
 <style scoped>
+/* ── Saving overlay ── */
+.saving-overlay {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+/* ── Orbital spinner ── */
+.orbital-wrapper {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbital-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(139, 92, 246, 0.9);
+  border-right-color: rgba(139, 92, 246, 0.3);
+  animation: orbit 1s linear infinite;
+}
+
+.orbital-ring.ring-2 {
+  inset: 8px;
+  border-top-color: transparent;
+  border-bottom-color: rgba(167, 139, 250, 0.7);
+  border-left-color: rgba(167, 139, 250, 0.2);
+  animation: orbit 0.7s linear infinite reverse;
+}
+
+.orbital-core {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-core 1.5s ease-in-out infinite;
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-core {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(139, 92, 246, 0);
+  }
+}
+
+/* ── Saving dots ── */
+.saving-dot {
+  animation: dot-bounce 0.9s ease-in-out infinite;
+}
+
+@keyframes dot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Checkmark draw animation ── */
+.checkmark-draw {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: draw-check 0.5s ease-out 0.1s forwards;
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.success-ring {
+  animation: ring-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes ring-pop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* ── Modal body scrollbar ── */
 .modal-body {
   scrollbar-width: thin;
