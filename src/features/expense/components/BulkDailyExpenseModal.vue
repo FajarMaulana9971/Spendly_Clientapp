@@ -4,7 +4,7 @@ import DatePicker from '../../../components/datePicker/DatePicker.vue'
 
 const emit = defineEmits(['close', 'created'])
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 // --- State ---
 const step = ref(1)

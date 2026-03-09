@@ -5,7 +5,7 @@ import CreatePaymentModal from './component/CreatePaymentModal.vue'
 import PaymentDetailModal from './component/PaymentDetailModal.vue'
 import DatePicker from '../../components/datePicker/DatePicker.vue'
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 // --- State ---
 const payments = ref([])
@@ -673,7 +673,7 @@ const PaymentExpenseList = defineComponent({
       loading.value = true
       error.value = false
       try {
-        const res = await fetch(`http://localhost:3000/api/payment/${props.paymentId}`)
+        const res = await fetch(`${BASE_URL}/payment/${props.paymentId}`)
         const json = await res.json()
         expenses.value = json.data?.expenses ?? []
       } catch {

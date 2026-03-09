@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 
 const emit = defineEmits(['close', 'created'])
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 // Steps: 'select' | 'confirm'
 const step = ref('select')

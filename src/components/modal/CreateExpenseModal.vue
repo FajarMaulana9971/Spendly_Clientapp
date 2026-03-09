@@ -100,7 +100,8 @@ const submit = async () => {
   loading.value = true
   error.value = ''
   try {
-    const res = await fetch('http://localhost:3000/api/expense', {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+    const res = await fetch(`${API_URL}/expense`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form.value, amount: Number(form.value.amount) }),
