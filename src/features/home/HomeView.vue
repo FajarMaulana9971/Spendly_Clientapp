@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import Navbar from '../../components/navbar/Navbar.vue'
 import SummaryCards from './components/SummaryCards.vue'
-import UnpaidExpensesChart from './components/UnpaidExpensesChart.vue'
 import MonthlyReportChart from './components/MonthlyReportChart.vue'
 import CategoryChart from './components/CategoryChart.vue'
 import ExpenseTable from './components/ExpenseTable.vue'
@@ -78,11 +77,6 @@ const handleCreated = () => {
           <CategoryChart :key="refreshKey" />
         </div>
       </div>
-
-      <!-- Unpaid Expenses -->
-      <!-- <div class="mt-6">
-        <UnpaidExpensesChart :key="refreshKey" />
-      </div> -->
 
       <!-- Tables Row -->
       <div class="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6" id="pengeluaran">
