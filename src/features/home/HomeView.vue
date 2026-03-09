@@ -80,9 +80,9 @@ const handleCreated = () => {
       </div>
 
       <!-- Unpaid Expenses -->
-      <div class="mt-6">
+      <!-- <div class="mt-6">
         <UnpaidExpensesChart :key="refreshKey" />
-      </div>
+      </div> -->
 
       <!-- Tables Row -->
       <div class="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6" id="pengeluaran">
