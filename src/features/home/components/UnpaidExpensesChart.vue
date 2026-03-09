@@ -22,7 +22,9 @@ const formatDate = (d) => {
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/expense')
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+
+    const res = await fetch(`${BASE_URL}/expense`)
     const json = await res.json()
     const all = json.data.expenseResponse || json || []
     expenses.value = all.filter((e) => !e.isPaid && !e.paymentId)

@@ -60,8 +60,9 @@ const fetchReport = async () => {
   }
 
   try {
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
     const res = await fetch(
-      `http://localhost:3000/api/expense/stats/monthly/${selectedYear.value}/${selectedMonth.value}`,
+      `${BASE_URL}/expense/stats/monthly/${selectedYear.value}/${selectedMonth.value}`,
     )
     const json = await res.json()
     // Set data → memicu watch(hasData) → nextTick → renderChart()

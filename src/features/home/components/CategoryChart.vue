@@ -30,7 +30,8 @@ const formatCurrency = (val) =>
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/expense/stats/category')
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+    const res = await fetch(`${BASE_URL}/expense/stats/category`)
     const json = await res.json()
     categories.value = json.data || json || []
     renderChart()

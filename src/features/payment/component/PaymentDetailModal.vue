@@ -7,7 +7,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 const payment = ref(null)
 const loading = ref(true)

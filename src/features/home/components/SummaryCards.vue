@@ -9,6 +9,8 @@ const expensesUnpaidTotal = ref([])
 const totalPayment = ref([])
 const loading = ref(true)
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+
 const formatCurrency = (val) =>
   new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -18,7 +20,7 @@ const formatCurrency = (val) =>
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/expense/total')
+    const res = await fetch(`${BASE_URL}/expense/total`)
     const json = await res.json()
     expensesTotal.value = json.data.totalExpense || json || []
   } catch (e) {
@@ -30,7 +32,7 @@ onMounted(async () => {
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/expense/total?type=paid')
+    const res = await fetch(`${BASE_URL}/expense/total?type=paid`)
     const json = await res.json()
     expensesPaidTotal.value = json.data.totalExpense || json || []
   } catch (e) {
@@ -42,7 +44,7 @@ onMounted(async () => {
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/expense/total?type=unpaid')
+    const res = await fetch(`${BASE_URL}/expense/total?type=unpaid`)
     const json = await res.json()
     expensesUnpaidTotal.value = json.data.totalExpense || json || []
   } catch (e) {
@@ -54,7 +56,7 @@ onMounted(async () => {
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:3000/api/payment/total-paid')
+    const res = await fetch(`${BASE_URL}/payment/total-paid`)
     const json = await res.json()
     totalPayment.value = json.data.totalAmount || json || []
   } catch (e) {

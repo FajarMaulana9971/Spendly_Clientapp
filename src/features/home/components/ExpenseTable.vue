@@ -14,7 +14,7 @@ const limit = ref(5)
 const totalItems = ref(0)
 const totalPages = ref(1)
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat('id-ID', {

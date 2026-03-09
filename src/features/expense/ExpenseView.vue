@@ -48,7 +48,7 @@ const SORT_OPTIONS = [
   { value: 'category', label: 'Kategori' },
 ]
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 const categories = [
   'Makanan',
@@ -67,12 +67,13 @@ const fetchExpenses = async () => {
   loading.value = true
   error.value = null
   try {
-    const params = new URLSearchParams({
-      page: currentPage.value,
-      limit: limit.value,
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-    })
+    const params = new URLSearchParams()
+
+    params.append('page', currentPage.value)
+    params.append('limit', limit.value)
+    params.append('sortBy', sortBy.value)
+    params.append('sortOrder', sortOrder.value)
+
     if (filterPaid.value !== '') params.append('paid', filterPaid.value)
     if (filterCategory.value) params.append('category', filterCategory.value)
     if (filterStartDate.value) params.append('startDate', filterStartDate.value)
@@ -477,7 +478,12 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
             <button
               v-for="size in PAGE_SIZE_OPTIONS"
               :key="size"
-              @click="((limit = size), onLimitChange())"
+              @click="
+                () => {
+                  limit = size
+                  onLimitChange()
+                }
+              "
               :class="[
                 'w-9 h-8 flex items-center justify-center rounded-lg text-xs font-medium border transition-all duration-150',
                 limit === size
