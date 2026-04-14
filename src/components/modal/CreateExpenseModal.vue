@@ -10,7 +10,7 @@ const form = ref({
   category: '',
   spentAt: new Date().toISOString().split('T')[0],
   isSplitBill: false,
-  description: '',
+  note: '',
 })
 const loading = ref(false)
 const error = ref('')
@@ -245,7 +245,7 @@ const submit = async () => {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-slate-400 text-xs uppercase tracking-wider block mb-1.5"
-              >Kategori</label
+              >Kategori *</label
             >
             <select
               v-model="form.category"
@@ -269,7 +269,7 @@ const submit = async () => {
             >Keterangan</label
           >
           <textarea
-            v-model="form.description"
+            v-model="form.note"
             rows="2"
             placeholder="Opsional..."
             class="w-full bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm placeholder:text-slate-500 resize-none"
