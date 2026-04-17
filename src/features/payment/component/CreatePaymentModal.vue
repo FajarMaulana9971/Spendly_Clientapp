@@ -39,7 +39,7 @@ const fetchUnpaidExpenses = async () => {
       // const res = await fetch(`${BASE_URL}/expense?${params}`)
       const res = await fetch(`${BASE_URL}/expenses/unpaid`)
       const json = await res.json()
-      const data = json.data.expenseResponse
+      const data = json.data
 
       const expenseData = data?.expenseResponse ?? data
       const pg = data?.pagination
