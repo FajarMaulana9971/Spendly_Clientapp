@@ -30,13 +30,14 @@ const fetchUnpaidExpenses = async () => {
   expenseError.value = null
   try {
     let page = 1
-    const limit = 50
+    // const limit = 50
     let allItems = []
     let totalPages = 1
 
     do {
-      const params = new URLSearchParams({ page, limit, paid: 'false' })
-      const res = await fetch(`${BASE_URL}/expense?${params}`)
+      // const params = new URLSearchParams({ page, limit, paid: 'false' })
+      // const res = await fetch(`${BASE_URL}/expense?${params}`)
+      const res = await fetch(`${BASE_URL}/expense/unpaid`)
       const json = await res.json()
       const data = json.data.expenseResponse
 
