@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import Navbar from '../../components/navbar/Navbar.vue'
 import CreateExpenseModal from '../../components/modal/CreateExpenseModal.vue'
 import ExpenseDetailModal from './components/ExpenseDetailModal.vue'
@@ -28,8 +28,7 @@ const filterStartDate = ref('')
 const filterEndDate = ref('')
 
 // Filters
-const search = ref('')
-const filterCategory = ref('')
+const filterTitle = ref('')
 const filterPaid = ref('')
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -50,22 +49,20 @@ const SORT_OPTIONS = [
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-const categories = [
-  'Makanan',
-  'Transportasi',
-  'Utilitas',
-  'Hiburan',
-  'Kesehatan',
-  'Belanja',
-  'Pendidikan',
-  'Harian',
-  'Lainnya',
-]
+// --- Abort controller untuk cancel request lama ---
+let abortController = null
 
 // --- Fetch ---
 const fetchExpenses = async () => {
+  // Cancel request sebelumnya jika masih berjalan
+  if (abortController) {
+    abortController.abort()
+  }
+  abortController = new AbortController()
+
   loading.value = true
   error.value = null
+
   try {
     const params = new URLSearchParams()
 
@@ -75,11 +72,14 @@ const fetchExpenses = async () => {
     params.append('sortOrder', sortOrder.value)
 
     if (filterPaid.value !== '') params.append('paid', filterPaid.value)
-    if (filterCategory.value) params.append('category', filterCategory.value)
+    if (filterTitle.value.trim()) params.append('title', filterTitle.value.trim())
     if (filterStartDate.value) params.append('startDate', filterStartDate.value)
     if (filterEndDate.value) params.append('endDate', filterEndDate.value)
 
-    const res = await fetch(`${BASE_URL}/expense?${params}`)
+    const res = await fetch(`${BASE_URL}/expense?${params}`, {
+      signal: abortController.signal,
+    })
+
     const json = await res.json()
     const data = json.data
 
@@ -102,6 +102,8 @@ const fetchExpenses = async () => {
       expenses.value = []
     }
   } catch (e) {
+    // Abaikan error abort (bukan error sungguhan)
+    if (e.name === 'AbortError') return
     error.value = 'Gagal memuat data pengeluaran.'
   } finally {
     loading.value = false
@@ -110,10 +112,35 @@ const fetchExpenses = async () => {
 
 onMounted(fetchExpenses)
 
-watch([filterPaid, filterCategory, filterStartDate, filterEndDate, sortBy, sortOrder], () => {
+onUnmounted(() => {
+  if (abortController) abortController.abort()
+  clearTimeout(titleDebounceTimer)
+})
+
+// --- Debounce untuk filterTitle ---
+// Pakai variable di luar watch agar tidak di-reset tiap render
+let titleDebounceTimer = null
+
+watch(filterTitle, () => {
+  // Selalu clear timer lama dulu
+  if (titleDebounceTimer) {
+    clearTimeout(titleDebounceTimer)
+    titleDebounceTimer = null
+  }
+  // Set timer baru — fetch hanya dijalankan setelah user berhenti mengetik 450ms
+  titleDebounceTimer = setTimeout(() => {
+    currentPage.value = 1
+    fetchExpenses()
+  }, 450)
+})
+
+// --- Watch filter lain (langsung fetch, tanpa debounce) ---
+watch([filterPaid, filterStartDate, filterEndDate, sortBy, sortOrder], () => {
   currentPage.value = 1
   fetchExpenses()
 })
+
+// --- Watch pagination & limit ---
 watch([currentPage, limit], fetchExpenses)
 
 // --- Edit ---
@@ -173,16 +200,8 @@ const onLimitChange = () => {
   currentPage.value = 1
 }
 
-const filteredExpenses = computed(() => {
-  if (!search.value.trim()) return expenses.value
-  const q = search.value.toLowerCase()
-  return expenses.value.filter(
-    (e) =>
-      e.title?.toLowerCase().includes(q) ||
-      e.category?.toLowerCase().includes(q) ||
-      e.note?.toLowerCase().includes(q),
-  )
-})
+// Data sudah difilter dari BE — tidak perlu filter lokal lagi
+const filteredExpenses = computed(() => expenses.value)
 
 const visiblePages = computed(() => {
   const pages = []
@@ -339,16 +358,15 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
           </div>
           <div class="hidden sm:block w-px h-10 bg-slate-700/50 self-end mb-0.5"></div>
           <div class="w-full sm:w-40">
-            <label class="block text-xs text-slate-500 mb-1.5 font-medium uppercase tracking-wider"
-              >Kategori</label
-            >
-            <select
-              v-model="filterCategory"
-              class="w-full bg-slate-700/50 text-white text-sm px-4 py-2.5 rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all appearance-none cursor-pointer"
-            >
-              <option value="">Semua</option>
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-            </select>
+            <label class="block text-xs text-slate-500 mb-1.5 font-medium uppercase tracking-wider">
+              Judul
+            </label>
+            <input
+              type="text"
+              v-model="filterTitle"
+              placeholder="Masukkan judul..."
+              class="w-full bg-slate-700/50 text-white text-sm px-4 py-2.5 rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all"
+            />
           </div>
           <div class="w-full sm:w-44">
             <label class="block text-xs text-slate-500 mb-1.5 font-medium uppercase tracking-wider"
@@ -367,7 +385,7 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
 
         <!-- Active filter chips -->
         <div
-          v-if="filterStartDate || filterEndDate || filterPaid || filterCategory"
+          v-if="filterStartDate || filterEndDate || filterPaid || filterTitle"
           class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-700/40"
         >
           <span class="text-xs text-slate-500 self-center">Filter aktif:</span>
@@ -402,11 +420,11 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
             </button>
           </span>
           <span
-            v-if="filterCategory"
+            v-if="filterTitle"
             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs"
           >
-            {{ filterCategory }}
-            <button @click="filterCategory = ''" class="hover:text-white transition-colors">
+            {{ filterTitle }}
+            <button @click="filterTitle = ''" class="hover:text-white transition-colors">
               <svg
                 class="w-3 h-3"
                 fill="none"
@@ -758,10 +776,6 @@ const deletingExpense = computed(() => expenses.value.find((e) => e.id === delet
 
                 <!-- ─── Action buttons ─── -->
                 <td class="px-4 py-4">
-                  <!--
-                    Mobile  (< md): selalu terlihat, icon-only, lebih kecil
-                    Desktop (≥ md): tersembunyi sampai hover baris
-                  -->
                   <div
                     class="action-btns flex items-center justify-end gap-0.5 transition-all duration-150"
                   >
