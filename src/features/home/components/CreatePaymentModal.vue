@@ -35,10 +35,9 @@ const fetchUnpaidExpenses = async () => {
     let totalPages = 1
 
     do {
-      const params = new URLSearchParams({ page, limit, paid: 'false' })
-      const res = await fetch(`${BASE_URL}/expense?${params}`)
+      const res = await fetch(`${BASE_URL}/expenses/unpaid`)
       const json = await res.json()
-      const data = json.data.expenseResponse
+      const data = json.data
 
       const expenseData = data?.expenseResponse ?? data
       const pg = data?.pagination
