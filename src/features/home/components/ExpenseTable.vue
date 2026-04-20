@@ -5,7 +5,6 @@ const emit = defineEmits(['pay'])
 
 const expenses = ref([])
 const loading = ref(true)
-const search = ref('')
 const filter = ref('all')
 
 // Pagination
@@ -78,13 +77,6 @@ watch([filter, limit], () => {
 })
 watch(currentPage, fetchExpenses)
 
-// Client-side search filter (only on current page data)
-const filtered = computed(() => {
-  if (!search.value.trim()) return expenses.value
-  const s = search.value.toLowerCase()
-  return expenses.value.filter((e) => (e.title || '').toLowerCase().includes(s))
-})
-
 const getDisplayAmount = (exp) => (exp.isSplitBill ? exp.finalAmount : exp.amount)
 
 const visiblePages = computed(() => {
@@ -118,19 +110,6 @@ const visiblePages = computed(() => {
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-2 mb-4">
-      <input
-        v-model="search"
-        placeholder="Cari..."
-        class="flex-1 min-w-28 bg-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder:text-slate-500"
-      />
-      <select
-        v-model="filter"
-        class="bg-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
-      >
-        <option value="all">Semua</option>
-        <option value="paid">Lunas</option>
-        <option value="unpaid">Belum Bayar</option>
-      </select>
       <!-- Page size -->
       <div class="flex items-center gap-1">
         <button
