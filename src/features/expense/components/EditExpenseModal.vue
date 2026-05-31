@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const props = defineProps({
   expense: {
@@ -269,13 +270,10 @@ const submit = async () => {
                 >●</span
               >
             </label>
-            <input
+            <DatePicker 
               v-model="form.spentAt"
-              type="date"
-              :class="[
-                'w-full bg-slate-700 text-slate-200 rounded-lg px-3 py-2.5 border focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm transition-colors',
-                changedFields.includes('spentAt') ? 'border-violet-500/60' : 'border-slate-600',
-              ]"
+              placeholder="Pilih Tanggal"
+              :class="changedFields.includes('spentAt') ? 'ring-1 ring-violte-500/40 rounded-xl' : ''"
             />
           </div>
         </div>
