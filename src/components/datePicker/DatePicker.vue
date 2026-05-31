@@ -101,18 +101,29 @@ const updateDropdownPosition = () => {
   const rect = pickerRef.value.getBoundingClientRect()
   const spaceBelow = window.innerHeight - rect.bottom
   const dropdownHeight = 340
+  const dropdownWidth = 280
+  const margin = 8;
+
+  let left = rect.left
+  const maxLeft = window.innerWidth - dropdownWidth - margin
+  if(left > maxLeft){
+    left = maxLeft
+  }
+  if(left < margin){
+    left = margin
+  }
 
   if (spaceBelow >= dropdownHeight) {
     dropdownStyle.value = {
       top: `${rect.bottom + 8}px`,
-      left: `${rect.left}px`,
-      width: `${Math.max(rect.width, 288)}px`,
+      left: `${left}px`,
+      width: `${dropdownWidth}px`,
     }
   } else {
     dropdownStyle.value = {
       top: `${rect.top - dropdownHeight - 8}px`,
-      left: `${rect.left}px`,
-      width: `${Math.max(rect.width, 288)}px`,
+      left: `${left}px`,
+      width: `${dropdownWidth}px`,
     }
   }
 }
