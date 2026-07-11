@@ -25,6 +25,7 @@ const categories = [
   'Belanja',
   'Pendidikan',
   'Lainnya',
+  'Harian'
 ]
 
 // ── Amount suggestions ──────────────────────────────────────

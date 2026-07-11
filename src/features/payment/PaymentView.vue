@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import Navbar from '../../components/navbar/Navbar.vue'
 import CreatePaymentModal from './component/CreatePaymentModal.vue'
 import PaymentDetailModal from './component/PaymentDetailModal.vue'
@@ -22,6 +22,7 @@ const filterStartDate = ref('')
 const filterEndDate = ref('')
 const sortBy = ref('createdAt')
 const sortOrder = ref('desc')
+const showFilter = ref(false)
 
 // Modals
 const showCreatePayment = ref(false)
@@ -30,9 +31,40 @@ const showDetail = ref(false)
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50]
 const SORT_OPTIONS = [
-  { value: 'createdAt', label: 'Tanggal Bayar' },
+  { value: 'createdAt', label: 'Tanggal' },
   { value: 'totalAmount', label: 'Total' },
 ]
+
+// --- Custom dropdown (menggantikan tombol grid bawaan) ---
+// openMenu menyimpan dropdown mana yang sedang terbuka: 'sort' | 'limit' | null
+const openMenu = ref(null)
+const toggleMenu = (name) => {
+  openMenu.value = openMenu.value === name ? null : name
+}
+const closeAllMenus = () => {
+  openMenu.value = null
+}
+
+const sortLabel = computed(
+  () => SORT_OPTIONS.find((o) => o.value === sortBy.value)?.label ?? 'Urutkan'
+)
+const limitLabel = computed(() => `${limit.value} / halaman`)
+
+const selectSortBy = (value) => {
+  sortBy.value = value
+  openMenu.value = null
+}
+const selectLimit = (value) => {
+  limit.value = value
+  currentPage.value = 1
+  openMenu.value = null
+}
+
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (filterStartDate.value || filterEndDate.value) count++
+  return count
+})
 
 // --- Fetch ---
 const fetchPayments = async () => {
@@ -68,21 +100,20 @@ const fetchPayments = async () => {
   }
 }
 
-onMounted(fetchPayments)
+onMounted(() => {
+  fetchPayments()
+  window.addEventListener('click', closeAllMenus)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllMenus)
+})
+
 watch([filterStartDate, filterEndDate, sortBy, sortOrder], () => {
   currentPage.value = 1
   fetchPayments()
 })
 watch([currentPage, limit], fetchPayments)
-
-const setSortBy = (field) => {
-  if (sortBy.value === field) {
-    sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc'
-  } else {
-    sortBy.value = field
-    sortOrder.value = 'desc'
-  }
-}
 
 const resetDateFilter = () => {
   filterStartDate.value = ''
@@ -208,122 +239,105 @@ const paymentSubtitle = (payment) => {
         </button>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl p-4 mb-4">
-        <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-          <div class="flex flex-col sm:flex-row gap-3 flex-1">
-            <div class="flex-1">
-              <label
-                class="block text-xs text-slate-500 mb-1.5 font-medium uppercase tracking-wider"
-                >Dari</label
-              >
-              <DatePicker
-                v-model="filterStartDate"
-                placeholder="Tanggal awal"
-                :max="filterEndDate || ''"
-              />
-            </div>
-            <div class="flex items-end pb-2.5 text-slate-600">
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </div>
-            <div class="flex-1">
-              <label
-                class="block text-xs text-slate-500 mb-1.5 font-medium uppercase tracking-wider"
-                >Hingga</label
-              >
-              <DatePicker
-                v-model="filterEndDate"
-                placeholder="Tanggal akhir"
-                :min="filterStartDate || ''"
-              />
-            </div>
-            <div class="flex items-end">
-              <button
-                v-if="filterStartDate || filterEndDate"
-                @click="resetDateFilter"
-                class="h-[42px] px-3 flex items-center gap-1.5 text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-xl border border-slate-600/50 text-xs font-medium transition-all"
-              >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active chips -->
-        <div
-          v-if="filterStartDate || filterEndDate"
-          class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-700/40"
-        >
-          <span class="text-xs text-slate-500 self-center">Filter aktif:</span>
-          <span
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs"
+      <!-- Toolbar (Filter + Sort + Limit) -->
+      <div
+        class="relative z-20 bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-2xl mb-4 overflow-visible"
+      >
+        <div class="flex flex-wrap items-center justify-center gap-3 px-4 py-3">
+          <!-- Filter toggle -->
+          <button
+            @click.stop="showFilter = !showFilter"
+            class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
           >
             <svg
-              class="w-3 h-3"
+              class="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               stroke-width="2"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18M6 12h12M10 19h4" />
             </svg>
-            {{ filterStartDate || '...' }} → {{ filterEndDate || '...' }}
-            <button @click="resetDateFilter" class="hover:text-white transition-colors">
-              <svg
-                class="w-3 h-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2.5"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </span>
-        </div>
-      </div>
-
-      <!-- Table Controls -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 px-1">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs text-slate-500 font-medium uppercase tracking-wider">Urutkan:</span>
-          <div class="flex items-center gap-1.5">
-            <button
-              v-for="opt in SORT_OPTIONS"
-              :key="opt.value"
-              @click="setSortBy(opt.value)"
-              :class="[
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150',
-                sortBy === opt.value
-                  ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                  : 'bg-slate-700/40 border-slate-600/40 text-slate-400 hover:text-white hover:bg-slate-700/60',
-              ]"
+            <span class="font-medium text-sm">Filter</span>
+            <span
+              v-if="activeFilterCount"
+              class="min-w-5 h-5 rounded-full bg-emerald-500 text-white text-[11px] flex items-center justify-center px-1"
             >
-              {{ opt.label }}
+              {{ activeFilterCount }}
+            </span>
+          </button>
+
+          <!-- Right -->
+          <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Sort (custom dropdown) -->
+            <div class="relative">
+              <button
+                type="button"
+                @click.stop="toggleMenu('sort')"
+                class="flex items-center gap-2 bg-slate-700/50 border border-slate-600/40 rounded-lg px-3 py-2 text-sm text-white hover:bg-slate-700 hover:border-slate-500/60 transition-all duration-150"
+                :class="openMenu === 'sort' ? 'border-emerald-500/60 ring-1 ring-emerald-500/30' : ''"
+              >
+                <span>{{ sortLabel }}</span>
+                <svg
+                  class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"
+                  :class="openMenu === 'sort' ? 'rotate-180 text-emerald-400' : ''"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="opacity-0 scale-95 -translate-y-1"
+                enter-to-class="opacity-100 scale-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100 scale-100 translate-y-0"
+                leave-to-class="opacity-0 scale-95 -translate-y-1"
+              >
+                <div
+                  v-if="openMenu === 'sort'"
+                  @click.stop
+                  class="absolute z-30 left-0 mt-2 w-40 origin-top-left rounded-xl border border-slate-700/60 bg-slate-800/95 backdrop-blur-md shadow-xl shadow-black/40 overflow-hidden py-1"
+                >
+                  <button
+                    v-for="item in SORT_OPTIONS"
+                    :key="item.value"
+                    @click="selectSortBy(item.value)"
+                    class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 text-sm text-left transition-colors"
+                    :class="
+                      sortBy === item.value
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
+                    "
+                  >
+                    {{ item.label }}
+                    <svg
+                      v-if="sortBy === item.value"
+                      class="w-3.5 h-3.5 text-emerald-400 shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- Urutan Asc/Desc -->
+            <button
+              @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+              class="w-9 h-9 rounded-lg bg-slate-700/50 border border-slate-600/40 flex items-center justify-center hover:bg-slate-700 transition"
+              title="Balik urutan"
+            >
               <svg
-                v-if="sortBy === opt.value"
-                class="w-3 h-3 transition-transform duration-200"
+                class="w-4 h-4 text-slate-300 transition-transform duration-200"
                 :class="sortOrder === 'asc' ? 'rotate-180' : ''"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -333,31 +347,103 @@ const paymentSubtitle = (payment) => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+
+            <!-- Limit (custom dropdown) -->
+            <div class="relative">
+              <button
+                type="button"
+                @click.stop="toggleMenu('limit')"
+                class="flex items-center gap-2 bg-slate-700/50 border border-slate-600/40 rounded-lg px-3 py-2 text-sm text-white hover:bg-slate-700 hover:border-slate-500/60 transition-all duration-150"
+                :class="openMenu === 'limit' ? 'border-emerald-500/60 ring-1 ring-emerald-500/30' : ''"
+              >
+                <span class="whitespace-nowrap">{{ limitLabel }}</span>
+                <svg
+                  class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"
+                  :class="openMenu === 'limit' ? 'rotate-180 text-emerald-400' : ''"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="opacity-0 scale-95 -translate-y-1"
+                enter-to-class="opacity-100 scale-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100 scale-100 translate-y-0"
+                leave-to-class="opacity-0 scale-95 -translate-y-1"
+              >
+                <div
+                  v-if="openMenu === 'limit'"
+                  @click.stop
+                  class="absolute z-30 right-0 mt-2 w-36 origin-top-right rounded-xl border border-slate-700/60 bg-slate-800/95 backdrop-blur-md shadow-xl shadow-black/40 overflow-hidden py-1"
+                >
+                  <button
+                    v-for="size in PAGE_SIZE_OPTIONS"
+                    :key="size"
+                    @click="selectLimit(size)"
+                    class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 text-sm text-left transition-colors"
+                    :class="
+                      limit === size
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
+                    "
+                  >
+                    {{ size }} / halaman
+                    <svg
+                      v-if="limit === size"
+                      class="w-3.5 h-3.5 text-emerald-400 shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                </div>
+              </Transition>
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <span
-            class="text-xs text-slate-500 font-medium uppercase tracking-wider whitespace-nowrap"
-            >Tampilkan:</span
-          >
-          <div class="flex items-center gap-1">
-            <button
-              v-for="size in PAGE_SIZE_OPTIONS"
-              :key="size"
-              @click="((limit = size), (currentPage = 1))"
-              :class="[
-                'w-9 h-8 flex items-center justify-center rounded-lg text-xs font-medium border transition-all duration-150',
-                limit === size
-                  ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30'
-                  : 'bg-slate-700/40 border-slate-600/40 text-slate-400 hover:text-white hover:bg-slate-700/60',
-              ]"
-            >
-              {{ size }}
-            </button>
+        <!-- Expand Filter (rentang tanggal) -->
+        <Transition
+          enter-active-class="transition-all duration-300"
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-[500px]"
+          leave-active-class="transition-all duration-300"
+          leave-from-class="opacity-100 max-h-[500px]"
+          leave-to-class="opacity-0 max-h-0"
+        >
+          <div v-if="showFilter" class="border-t border-slate-700/50 p-4" @click.stop>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <DatePicker
+                v-model="filterStartDate"
+                placeholder="Tanggal awal"
+                :max="filterEndDate || ''"
+              />
+              <DatePicker
+                v-model="filterEndDate"
+                placeholder="Tanggal akhir"
+                :min="filterStartDate || ''"
+              />
+            </div>
+
+            <div v-if="activeFilterCount" class="flex justify-end mt-4">
+              <button
+                @click="resetDateFilter"
+                class="text-sm text-emerald-300 hover:text-white transition"
+              >
+                Reset filter tanggal
+              </button>
+            </div>
           </div>
-          <span class="text-xs text-slate-500">per halaman</span>
-        </div>
+        </Transition>
       </div>
 
       <!-- Payment List -->
@@ -413,28 +499,6 @@ const paymentSubtitle = (payment) => {
               class="flex items-center gap-4 px-6 py-4 hover:bg-slate-700/20 transition-colors duration-150 cursor-pointer"
               @click="toggleExpand(payment.id)"
             >
-              <!-- <div class="shrink-0">
-                <div
-                  class="w-8 h-8 flex items-center justify-center rounded-lg border transition-all duration-200"
-                  :class="
-                    expandedId === payment.id
-                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                      : 'bg-slate-700/40 border-slate-600/40 text-slate-500'
-                  "
-                >
-                  <svg
-                    class="w-4 h-4 transition-transform duration-200"
-                    :class="expandedId === payment.id ? 'rotate-180' : ''"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div> -->
-
               <!-- Icon -->
               <div
                 class="shrink-0 w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center"
