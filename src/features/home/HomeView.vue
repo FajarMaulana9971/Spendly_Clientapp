@@ -4,8 +4,6 @@ import Navbar from '../../components/navbar/Navbar.vue'
 import SummaryCards from './components/SummaryCards.vue'
 import MonthlyReportChart from './components/MonthlyReportChart.vue'
 import CategoryChart from './components/CategoryChart.vue'
-import ExpenseTable from './components/ExpenseTable.vue'
-import PaymentTable from './components/PaymentTable.vue'
 import CreateExpenseModal from '../../components/modal/CreateExpenseModal.vue'
 import CreatePaymentModal from './components/CreatePaymentModal.vue'
 
@@ -75,14 +73,6 @@ const handleCreated = () => {
         </div>
         <div>
           <CategoryChart :key="refreshKey" />
-        </div>
-      </div>
-
-      <!-- Tables Row -->
-      <div class="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6" id="pengeluaran">
-        <ExpenseTable :key="refreshKey" @pay="showCreatePayment = true" />
-        <div id="pembayaran">
-          <PaymentTable :key="refreshKey" />
         </div>
       </div>
     </main>
