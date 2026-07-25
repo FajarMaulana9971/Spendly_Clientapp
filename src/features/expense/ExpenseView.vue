@@ -920,285 +920,287 @@ const onLeave = (el) => {
             </button>
 
             <!-- Dropdown animasi berisi header kolom lengkap + list pengeluaran hari itu -->
-            <Transition @enter="onEnter" @after-enter="onAfterEnter" @leave="onLeave">
-              <div v-if="isExpanded(group.dateKey)" class="overflow-hidden">
-                <div class="overflow-x-auto">
-                  <div class="min-w-[760px]">
-                    <!-- Header kolom (Judul, Kategori, Jumlah, Split Bill, Status, Aksi) -->
-                    <div
-                      class="expense-grid gap-2 px-6 py-2.5 border-t border-b border-slate-700/40 bg-slate-800/40"
-                    >
-                      <button
-                        @click.stop="setSortBy('title')"
-                        class="flex items-center gap-1.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-violet-300 transition-colors select-none"
+            <div class="grid-collapse" :class="{ 'is-open': isExpanded(group.dateKey) }">
+              <div class="grid-collapse-inner">
+                <div v-if="true" class="overflow-x-auto">
+                  <div class="overflow-x-auto">
+                    <div class="min-w-[760px]">
+                      <!-- Header kolom (Judul, Kategori, Jumlah, Split Bill, Status, Aksi) -->
+                      <div
+                        class="expense-grid gap-2 px-6 py-2.5 border-t border-b border-slate-700/40 bg-slate-800/40"
                       >
-                        Judul
-                        <svg
-                          class="w-3 h-3 transition-all"
-                          :class="
-                            sortBy === 'title'
-                              ? sortOrder === 'asc'
-                                ? 'text-violet-400 rotate-180'
-                                : 'text-violet-400'
-                              : 'text-slate-600'
-                          "
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="2.5"
+                        <button
+                          @click.stop="setSortBy('title')"
+                          class="flex items-center gap-1.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-violet-300 transition-colors select-none"
                         >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      <button
-                        @click.stop="setSortBy('category')"
-                        class="flex items-center gap-1.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-violet-300 transition-colors select-none"
-                      >
-                        Kategori
-                        <svg
-                          class="w-3 h-3 transition-all"
-                          :class="
-                            sortBy === 'category'
-                              ? sortOrder === 'asc'
-                                ? 'text-violet-400 rotate-180'
-                                : 'text-violet-400'
-                              : 'text-slate-600'
-                          "
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      <button
-                        @click.stop="setSortBy('amount')"
-                        class="flex items-center justify-end gap-1.5 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-violet-300 transition-colors select-none"
-                      >
-                        Jumlah
-                        <svg
-                          class="w-3 h-3 transition-all"
-                          :class="
-                            sortBy === 'amount'
-                              ? sortOrder === 'asc'
-                                ? 'text-violet-400 rotate-180'
-                                : 'text-violet-400'
-                              : 'text-slate-600'
-                          "
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      <span class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        Split Bill
-                      </span>
-                      <span class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        Status
-                      </span>
-                      <span class="text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                        Aksi
-                      </span>
-                    </div>
-
-                    <!-- Baris transaksi hari itu -->
-                    <div
-                      v-for="expense in group.items"
-                      :key="expense.id"
-                      class="row-item group/row relative expense-grid gap-2 items-center px-6 py-3 border-t border-slate-700/20 hover:bg-slate-700/10 hover:pl-7 transition-all duration-150"
-                    >
-                      <span
-                        class="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full opacity-0 group-hover/row:opacity-100 group-hover/row:h-7 transition-all duration-150"
-                        :class="expense.isPaid ? 'bg-emerald-400' : 'bg-amber-400'"
-                      ></span>
-                      <div class="min-w-0 pr-2">
-                        <span class="text-white font-medium text-sm">{{ expense.title }}</span>
-                      </div>
-
-                      <div>
-                        <span
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-300 border border-slate-600/50"
-                          >{{ expense.category || '-' }}</span
-                        >
-                      </div>
-
-                      <div class="text-right">
-                        <div v-if="expense.isSplitBill" class="flex flex-col items-end gap-0.5">
-                          <span
-                            class="text-slate-500 text-xs tabular-nums line-through decoration-slate-500/70"
-                            >{{ formatCurrency(expense.amount) }}</span
+                          Judul
+                          <svg
+                            class="w-3 h-3 transition-all"
+                            :class="
+                              sortBy === 'title'
+                                ? sortOrder === 'asc'
+                                  ? 'text-violet-400 rotate-180'
+                                  : 'text-violet-400'
+                                : 'text-slate-600'
+                            "
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2.5"
                           >
-                          <span class="text-emerald-400 font-semibold text-sm tabular-nums">{{
-                            formatCurrency(expense.finalAmount)
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        <button
+                          @click.stop="setSortBy('category')"
+                          class="flex items-center gap-1.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-violet-300 transition-colors select-none"
+                        >
+                          Kategori
+                          <svg
+                            class="w-3 h-3 transition-all"
+                            :class="
+                              sortBy === 'category'
+                                ? sortOrder === 'asc'
+                                  ? 'text-violet-400 rotate-180'
+                                  : 'text-violet-400'
+                                : 'text-slate-600'
+                            "
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                          >
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        <button
+                          @click.stop="setSortBy('amount')"
+                          class="flex items-center justify-end gap-1.5 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider hover:text-violet-300 transition-colors select-none"
+                        >
+                          Jumlah
+                          <svg
+                            class="w-3 h-3 transition-all"
+                            :class="
+                              sortBy === 'amount'
+                                ? sortOrder === 'asc'
+                                  ? 'text-violet-400 rotate-180'
+                                  : 'text-violet-400'
+                                : 'text-slate-600'
+                            "
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                          >
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        <span class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          Split Bill
+                        </span>
+                        <span class="text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          Status
+                        </span>
+                        <span class="text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          Aksi
+                        </span>
+                      </div>
+
+                      <!-- Baris transaksi hari itu -->
+                      <div
+                        v-for="expense in group.items"
+                        :key="expense.id"
+                        class="row-item group/row relative expense-grid gap-2 items-center px-6 py-3 border-t border-slate-700/20 hover:bg-slate-700/10 hover:pl-7 transition-all duration-150"
+                      >
+                        <span
+                          class="absolute left-2 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full opacity-0 group-hover/row:opacity-100 group-hover/row:h-7 transition-all duration-150"
+                          :class="expense.isPaid ? 'bg-emerald-400' : 'bg-amber-400'"
+                        ></span>
+                        <div class="min-w-0 pr-2">
+                          <span class="text-white font-medium text-sm">{{ expense.title }}</span>
+                        </div>
+
+                        <div>
+                          <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-300 border border-slate-600/50"
+                            >{{ expense.category || '-' }}</span
+                          >
+                        </div>
+
+                        <div class="text-right">
+                          <div v-if="expense.isSplitBill" class="flex flex-col items-end gap-0.5">
+                            <span
+                              class="text-slate-500 text-xs tabular-nums line-through decoration-slate-500/70"
+                              >{{ formatCurrency(expense.amount) }}</span
+                            >
+                            <span class="text-emerald-400 font-semibold text-sm tabular-nums">{{
+                              formatCurrency(expense.finalAmount)
+                            }}</span>
+                          </div>
+                          <span v-else class="text-emerald-400 font-semibold text-sm tabular-nums">{{
+                            formatCurrency(expense.finalAmount ?? expense.amount)
                           }}</span>
                         </div>
-                        <span v-else class="text-emerald-400 font-semibold text-sm tabular-nums">{{
-                          formatCurrency(expense.finalAmount ?? expense.amount)
-                        }}</span>
-                      </div>
 
-                      <div class="flex justify-center">
-                        <span
-                          v-if="expense.isSplitBill"
-                          class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-violet-500/20 border border-violet-500/40"
-                        >
-                          <svg
-                            class="w-3.5 h-3.5 text-violet-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                          >
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </span>
-                        <span
-                          v-else
-                          class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-700/40 border border-slate-600/40"
-                        >
-                          <svg
-                            class="w-3 h-3 text-slate-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </span>
-                      </div>
-
-                      <div class="flex justify-center">
-                        <span
-                          :class="
-                          expense.isPaid
-                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                            : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-                          "
-                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
-                        >
+                        <div class="flex justify-center">
                           <span
-                            :class="expense.isPaid ? 'bg-emerald-400' : 'bg-rose-400'"
-                            class="w-1.5 h-1.5 rounded-full"
-                          ></span>
-                          {{ expense.isPaid ? 'Lunas' : 'Belum' }}
-                        </span>
-                      </div>
-
-                      <!-- Aksi -->
-                      <div class="action-btns flex items-center justify-end gap-0.5 transition-all duration-150">
-                        <!-- Detail -->
-                        <button
-                          @click="openDetail(expense.id)"
-                          title="Lihat detail"
-                          class="flex items-center justify-center gap-1 text-slate-400 hover:text-violet-300 active:text-violet-300 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-violet-500/10 active:bg-violet-500/15 transition-all"
-                        >
-                          <svg
-                            class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2"
+                            v-if="expense.isSplitBill"
+                            class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-violet-500/20 border border-violet-500/40"
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                          <span class="hidden lg:inline">Detail</span>
-                        </button>
-
-                        <!-- Divider -->
-                        <span class="w-px h-4 bg-slate-700 mx-0.5"></span>
-
-                        <!-- Edit — hanya jika belum dibayar -->
-                        <button
-                          v-if="!expense.isPaid"
-                          @click="openEdit(expense)"
-                          title="Edit pengeluaran"
-                          class="flex items-center justify-center gap-1 text-slate-400 hover:text-amber-300 active:text-amber-300 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-amber-500/10 active:bg-amber-500/15 transition-all"
-                        >
-                          <svg
-                            class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2"
+                            <svg
+                              class="w-3.5 h-3.5 text-violet-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                          <span
+                            v-else
+                            class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-700/40 border border-slate-600/40"
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                          <span class="hidden lg:inline">Edit</span>
-                        </button>
+                            <svg
+                              class="w-3 h-3 text-slate-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </span>
+                        </div>
 
-                        <!-- Lock icon — sudah dibayar, tidak bisa edit/delete -->
-                        <span
-                          v-else
-                          title="Sudah lunas — tidak dapat diubah"
-                          class="flex items-center justify-center w-8 h-8 text-slate-700 cursor-not-allowed"
-                        >
-                          <svg
-                            class="w-4 h-4 md:w-3.5 md:h-3.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2"
+                        <div class="flex justify-center">
+                          <span
+                            :class="
+                            expense.isPaid
+                              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                              : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                            "
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                          </svg>
-                        </span>
+                            <span
+                              :class="expense.isPaid ? 'bg-emerald-400' : 'bg-rose-400'"
+                              class="w-1.5 h-1.5 rounded-full"
+                            ></span>
+                            {{ expense.isPaid ? 'Lunas' : 'Belum' }}
+                          </span>
+                        </div>
 
-                        <!-- Delete — hanya jika belum dibayar -->
-                        <button
-                          v-if="!expense.isPaid"
-                          @click="confirmDelete(expense.id)"
-                          title="Hapus pengeluaran"
-                          class="flex items-center justify-center gap-1 text-slate-400 hover:text-rose-400 active:text-rose-400 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-rose-500/10 active:bg-rose-500/15 transition-all"
-                        >
-                          <svg
-                            class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2"
+                        <!-- Aksi -->
+                        <div class="action-btns flex items-center justify-end gap-0.5 transition-all duration-150">
+                          <!-- Detail -->
+                          <button
+                            @click="openDetail(expense.id)"
+                            title="Lihat detail"
+                            class="flex items-center justify-center gap-1 text-slate-400 hover:text-violet-300 active:text-violet-300 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-violet-500/10 active:bg-violet-500/15 transition-all"
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
+                            <svg
+                              class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            <span class="hidden lg:inline">Detail</span>
+                          </button>
+
+                          <!-- Divider -->
+                          <span class="w-px h-4 bg-slate-700 mx-0.5"></span>
+
+                          <!-- Edit — hanya jika belum dibayar -->
+                          <button
+                            v-if="!expense.isPaid"
+                            @click="openEdit(expense)"
+                            title="Edit pengeluaran"
+                            class="flex items-center justify-center gap-1 text-slate-400 hover:text-amber-300 active:text-amber-300 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-amber-500/10 active:bg-amber-500/15 transition-all"
+                          >
+                            <svg
+                              class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                            <span class="hidden lg:inline">Edit</span>
+                          </button>
+
+                          <!-- Lock icon — sudah dibayar, tidak bisa edit/delete -->
+                          <span
+                            v-else
+                            title="Sudah lunas — tidak dapat diubah"
+                            class="flex items-center justify-center w-8 h-8 text-slate-700 cursor-not-allowed"
+                          >
+                            <svg
+                              class="w-4 h-4 md:w-3.5 md:h-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                              />
+                            </svg>
+                          </span>
+
+                          <!-- Delete — hanya jika belum dibayar -->
+                          <button
+                            v-if="!expense.isPaid"
+                            @click="confirmDelete(expense.id)"
+                            title="Hapus pengeluaran"
+                            class="flex items-center justify-center gap-1 text-slate-400 hover:text-rose-400 active:text-rose-400 text-xs font-medium w-8 h-8 md:w-auto md:h-auto md:px-2 md:py-1.5 rounded-lg hover:bg-rose-500/10 active:bg-rose-500/15 transition-all"
+                          >
+                            <svg
+                              class="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </Transition>
+            </div>
           </div>
         </div>
 
@@ -1415,5 +1417,18 @@ const onLeave = (el) => {
   .row-item:hover .action-btns {
     opacity: 1;
   }
+}
+
+.grid-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.grid-collapse.is-open {
+  grid-template-rows: 1fr;
+}
+.grid-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 </style>
