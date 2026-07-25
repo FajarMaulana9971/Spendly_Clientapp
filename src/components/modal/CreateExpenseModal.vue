@@ -19,13 +19,12 @@ const showSuggestions = ref(false)
 const categories = [
   'Makanan',
   'Transportasi',
-  'Utilitas',
   'Hiburan',
   'Kesehatan',
   'Belanja',
   'Pendidikan',
-  'Lainnya',
-  'Harian'
+  'Harian',
+  'Lainnya'
 ]
 
 // ── Amount suggestions ──────────────────────────────────────
